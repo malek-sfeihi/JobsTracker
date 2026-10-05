@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timezone
 
 from app.core.config import settings
 
@@ -30,6 +31,14 @@ CREATE TABLE IF NOT EXISTS applications (
     rejection_quote TEXT            -- the sentence of the email that says it
 );
 
+-- One row per sync run, so the dashboard can say "synced at 07:00" or warn you if it failed.
+CREATE TABLE IF NOT EXISTS sync_runs (
+    ran_at     TEXT NOT NULL,
+    new_emails INTEGER,
+    ok         INTEGER NOT NULL,    -- 1 = success, 0 = failure (SQLite has no boolean type)
+    message    TEXT
+);
+
 -- Your manual corrections from the dashboard. Applications are rebuilt from scratch on
 -- every sync, so corrections live here and are re-applied each time (NULL = no correction).
 CREATE TABLE IF NOT EXISTS overrides (
@@ -58,6 +67,14 @@ def _migrate(conn: sqlite3.Connection) -> None:
     _add_column_if_missing(conn, "applications", "anchor_email_id", "TEXT")
     _add_column_if_missing(conn, "applications", "rejection_reason", "TEXT")
     _add_column_if_missing(conn, "applications", "rejection_quote", "TEXT")
+
+
+def record_sync_run(conn: sqlite3.Connection, new_emails: int | None, ok: bool, message: str = "") -> None:
+    conn.execute(
+        "INSERT INTO sync_runs (ran_at, new_emails, ok, message) VALUES (?, ?, ?, ?)",
+        (datetime.now(timezone.utc).isoformat(), new_emails, int(ok), message),
+    )
+    conn.commit()
 
 
 def save_override(conn: sqlite3.Connection, anchor_email_id: str, company: str | None,

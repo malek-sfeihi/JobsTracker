@@ -144,12 +144,28 @@ def style_chart(chart: alt.Chart) -> alt.Chart:
 # ---------------------------------------------------------------- sidebar
 with st.sidebar:
     st.markdown("### 🌿 JobsTracker")
-    if st.button("Sync with Gmail", icon="🔄", width="stretch"):
+    if settings.demo:
+        if not settings.db_path.exists():
+            from app.demo import seed_demo
+            seed_demo()
+        st.info("Demo mode: fictional companies and emails.", icon=":material/science:")
+    elif st.button("Sync with Gmail", icon="🔄", width="stretch"):
         from app.services.sync import sync
         with st.spinner("Reading new emails..."):
             new_count = sync()
             build_applications()
         st.toast(f"{new_count} new email(s) synced")
+    # Last sync (the 7:00 scheduled one, or a manual click): reassure, or warn if it failed
+    conn = get_connection()
+    last_run = conn.execute("SELECT * FROM sync_runs ORDER BY ran_at DESC LIMIT 1").fetchone()
+    conn.close()
+    if last_run:
+        when = datetime.fromisoformat(last_run["ran_at"]).astimezone()  # UTC -> your local time
+        label = f"{when:%H:%M}" if when.date() == datetime.now().date() else f"{when:%d %b, %H:%M}"
+        if last_run["ok"]:
+            st.caption(f":material/check_circle: Synced at {label} · {last_run['new_emails']} new email(s)")
+        else:
+            st.warning(f"Last sync failed ({label}): {last_run['message']}", icon=":material/error:")
     weekly_goal = st.number_input("Weekly goal (applications)", min_value=1, max_value=50, value=5)
     st.caption(f"Ghosted = no news for {settings.ghost_days}+ days.")
 

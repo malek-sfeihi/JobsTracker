@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # backend/ folder: this file is backend/app/core/config.py, so we go up 3 levels
@@ -18,6 +19,15 @@ class Settings(BaseSettings):
     user_name: str = "Malek"
     # readonly: the app can read emails but never send, delete or modify them
     gmail_scopes: list[str] = ["https://www.googleapis.com/auth/gmail.readonly"]
+    # DEMO=true (env var or .env): fictional data in demo.db, your real emails are never touched
+    demo: bool = False
+
+    @model_validator(mode="after")
+    def _use_demo_database(self) -> "Settings":
+        if self.demo:
+            self.db_path = BASE_DIR / "demo.db"
+            self.user_name = "Alex"
+        return self
 
 
 settings = Settings()

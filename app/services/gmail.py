@@ -12,8 +12,16 @@ from googleapiclient.discovery import build
 from app.core.config import settings
 
 
-def get_credentials() -> Credentials:
-    """Return valid Google credentials, logging in through the browser if needed."""
+class LoginRequiredError(Exception):
+    """Raised when Google needs you to log in again but nobody is there to do it."""
+
+
+def get_credentials(interactive: bool = True) -> Credentials:
+    """Return valid Google credentials, logging in through the browser if needed.
+
+    interactive=False (scheduled runs): never open a browser - raise LoginRequiredError instead,
+    otherwise the task would wait forever for a login nobody is there to do.
+    """
     creds = None
     if settings.token_path.exists():
         creds = Credentials.from_authorized_user_file(
@@ -31,6 +39,10 @@ def get_credentials() -> Credentials:
             creds = None
 
     if not creds or not creds.valid:
+        if not interactive:
+            raise LoginRequiredError(
+                "Gmail login expired. Run `python -m app.services.sync` once by hand to log in again."
+            )
         flow = InstalledAppFlow.from_client_secrets_file(
             str(settings.client_secret_path), settings.gmail_scopes
         )
@@ -40,8 +52,8 @@ def get_credentials() -> Credentials:
     return creds
 
 
-def get_gmail_service():
-    return build("gmail", "v1", credentials=get_credentials())
+def get_gmail_service(interactive: bool = True):
+    return build("gmail", "v1", credentials=get_credentials(interactive))
 
 
 def _decode(data: str) -> str:
@@ -100,9 +112,9 @@ def _fetch_email(service, message_id: str) -> dict:
     }
 
 
-def list_message_ids(query: str = "", max_results: int = 50) -> list[str]:
+def list_message_ids(query: str = "", max_results: int = 50, interactive: bool = True) -> list[str]:
     """Return the IDs of emails matching a Gmail search query (cheap: no content downloaded)."""
-    service = get_gmail_service()
+    service = get_gmail_service(interactive)
 
     message_ids = []
     page_token = None
@@ -121,9 +133,9 @@ def list_message_ids(query: str = "", max_results: int = 50) -> list[str]:
     return message_ids
 
 
-def fetch_emails(message_ids: list[str]) -> list[dict]:
+def fetch_emails(message_ids: list[str], interactive: bool = True) -> list[dict]:
     """Download the full content of the given emails."""
-    service = get_gmail_service()
+    service = get_gmail_service(interactive)
     emails = []
     for i, message_id in enumerate(message_ids, start=1):
         emails.append(_fetch_email(service, message_id))
