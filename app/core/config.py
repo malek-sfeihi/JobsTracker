@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     db_path: Path = BASE_DIR / "jobtracker.db"
     # No news for this many days after your last step -> ghosted (or expired, if it was your turn)
     ghost_days: int = 15
+    # Shown in the dashboard greeting; set USER_NAME in .env to change it
+    user_name: str = "Malek"
     # readonly: the app can read emails but never send, delete or modify them
     gmail_scopes: list[str] = ["https://www.googleapis.com/auth/gmail.readonly"]
 

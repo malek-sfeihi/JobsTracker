@@ -26,7 +26,7 @@ RULES = {
         r"position has been filled", r"not currently hiring in your",
         r"malheureusement", r"ne pas donner suite", r"pas (pu )?donner (une )?suite",
         r"pas ete retenue?", r"avons le regret", r"regret de vous informer",
-        r"vivier de talents",
+        # (not "vivier de talents": those emails are GDPR consent requests, not rejections)
     ],
     "interview": [
         r"invite you (to|for) an interview", r"schedule an interview", r"interview invitation",

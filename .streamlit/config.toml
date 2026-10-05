@@ -1,0 +1,18 @@
+[theme]
+base = "light"
+# Plum-lilac accent: distinct from the lavender that means "ghosted" (validated)
+primaryColor = "#5E4E96"
+backgroundColor = "#F6F4F0"            # warm paper
+secondaryBackgroundColor = "#F1EDF7"   # lilac tint: inputs, multiselect
+textColor = "#1F2433"
+borderColor = "#E4DDF0"
+dataframeHeaderBackgroundColor = "#F1EDF7"
+dataframeBorderColor = "#E9E3F2"
+font = "sans serif"
+
+[theme.sidebar]
+backgroundColor = "#ECE6F5"            # soft lilac sidebar
+secondaryBackgroundColor = "#FFFFFF"
+
+[client]
+toolbarMode = "minimal"

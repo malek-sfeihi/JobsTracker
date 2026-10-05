@@ -5,6 +5,7 @@ from difflib import SequenceMatcher
 from app.core.config import settings
 from app.db.database import get_connection
 from app.filters.extract import company_key, extract_company, extract_position, same_company
+from app.filters.reasons import extract_reason
 from app.filters.job_filter import normalize
 
 
@@ -63,6 +64,7 @@ def build_applications() -> None:
             "kind": row["kind"],
             "category": row["category"],
             "subject": row["subject"],
+            "body": row["body"],
             "company": company,
             "key": company_key(company),
             "position": extract_position(row["subject"], row["body"]),
@@ -98,15 +100,30 @@ def build_applications() -> None:
             applications.append({**email, "emails": [email]})
 
     today = datetime.now(timezone.utc)
+    overrides = {row["anchor_email_id"]: row for row in conn.execute("SELECT * FROM overrides")}
     conn.execute("UPDATE emails SET application_id = NULL")
     conn.execute("DELETE FROM applications")
     for app in applications:
         app["emails"].sort(key=lambda e: e["date"])
+        anchor = app["emails"][0]["id"]
+        company, position = app["company"], app["position"]
+        status = compute_status(app["emails"], today)
+        # Your corrections win over the automatic guesses
+        override = overrides.get(anchor)
+        if override:
+            company = override["company"] or company
+            position = override["position"] or position
+            status = override["status"] or status
+        # Why they said no: read from the most recent rejection email
+        rejections = [e for e in app["emails"] if e["category"] == "rejection"]
+        reason, quote = extract_reason(rejections[-1]["body"]) if rejections else (None, None)
         cursor = conn.execute(
-            """INSERT INTO applications (company, position, kind, status, last_activity)
-               VALUES (?, ?, ?, ?, ?)""",
-            (app["company"], app["position"], app["kind"],
-             compute_status(app["emails"], today), app["emails"][-1]["date"].isoformat()),
+            """INSERT INTO applications
+               (company, position, kind, status, last_activity, first_activity, anchor_email_id,
+                rejection_reason, rejection_quote)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (company, position, app["kind"], status, app["emails"][-1]["date"].isoformat(),
+             app["emails"][0]["date"].isoformat(), anchor, reason, quote),
         )
         conn.executemany(
             "UPDATE emails SET application_id = ? WHERE id = ?",

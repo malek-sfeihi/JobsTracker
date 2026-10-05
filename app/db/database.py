@@ -23,7 +23,20 @@ CREATE TABLE IF NOT EXISTS applications (
     position TEXT,                  -- NULL when no email mentions the job title
     kind     TEXT NOT NULL,
     status   TEXT,                  -- action_needed / in_progress / ghosted / expired / rejected / offer
-    last_activity TEXT              -- date of the most recent email
+    last_activity TEXT,             -- date of the most recent email
+    first_activity TEXT,            -- date of the first email (~ when you applied)
+    anchor_email_id TEXT,           -- id of the first email: stable across rebuilds, unlike `id`
+    rejection_reason TEXT,          -- why they said no (see app/filters/reasons.py)
+    rejection_quote TEXT            -- the sentence of the email that says it
+);
+
+-- Your manual corrections from the dashboard. Applications are rebuilt from scratch on
+-- every sync, so corrections live here and are re-applied each time (NULL = no correction).
+CREATE TABLE IF NOT EXISTS overrides (
+    anchor_email_id TEXT PRIMARY KEY,
+    company  TEXT,
+    position TEXT,
+    status   TEXT
 );
 """
 
@@ -41,6 +54,24 @@ def _migrate(conn: sqlite3.Connection) -> None:
     _add_column_if_missing(conn, "emails", "application_id", "INTEGER REFERENCES applications(id)")
     _add_column_if_missing(conn, "applications", "status", "TEXT")
     _add_column_if_missing(conn, "applications", "last_activity", "TEXT")
+    _add_column_if_missing(conn, "applications", "first_activity", "TEXT")
+    _add_column_if_missing(conn, "applications", "anchor_email_id", "TEXT")
+    _add_column_if_missing(conn, "applications", "rejection_reason", "TEXT")
+    _add_column_if_missing(conn, "applications", "rejection_quote", "TEXT")
+
+
+def save_override(conn: sqlite3.Connection, anchor_email_id: str, company: str | None,
+                  position: str | None, status: str | None) -> None:
+    # "Upsert": insert, or if a correction already exists, only overwrite the fields given now
+    # (NULL keeps the previous correction - renaming today won't erase yesterday's status fix)
+    conn.execute(
+        """INSERT INTO overrides (anchor_email_id, company, position, status) VALUES (?, ?, ?, ?)
+           ON CONFLICT(anchor_email_id) DO UPDATE SET
+               company  = COALESCE(excluded.company, overrides.company),
+               position = COALESCE(excluded.position, overrides.position),
+               status   = COALESCE(excluded.status, overrides.status)""",
+        (anchor_email_id, company, position, status),
+    )
 
 
 def _add_column_if_missing(conn: sqlite3.Connection, table: str, column: str, definition: str) -> None:
