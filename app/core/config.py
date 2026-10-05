@@ -1,0 +1,18 @@
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# backend/ folder: this file is backend/app/core/config.py, so we go up 3 levels
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", extra="ignore")
+
+    client_secret_path: Path = BASE_DIR / "client_secret.json"
+    token_path: Path = BASE_DIR / "token.json"
+    # readonly: the app can read emails but never send, delete or modify them
+    gmail_scopes: list[str] = ["https://www.googleapis.com/auth/gmail.readonly"]
+
+
+settings = Settings()
