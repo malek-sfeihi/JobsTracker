@@ -3,3 +3,4 @@ venv/
 client_secret.json
 token.json
 __pycache__/
+*.db
