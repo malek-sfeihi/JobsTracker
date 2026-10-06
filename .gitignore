@@ -5,3 +5,7 @@ token.json
 __pycache__/
 *.db
 logs/
+
+# Local AI-assistant skills (links to files inside the venv, not part of the project)
+.claude/
+.agents/
