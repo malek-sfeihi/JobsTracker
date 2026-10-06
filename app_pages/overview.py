@@ -9,6 +9,7 @@ import streamlit as st
 from app.core.config import settings
 from app.db.database import get_connection, save_override
 from app.filters.reasons import REASON_LABELS
+from app.ui import LABEL_TO_STATUS, STATUS_LABELS, nice_name
 from app.services.applications import build_applications
 
 # ---------------------------------------------------------------- design tokens
@@ -34,11 +35,6 @@ STATUS_TO_GROUP = {
     "action_needed": "action_needed", "in_progress": "in_progress", "offer": "offer",
     "ghosted": "ghosted", "rejected": "closed", "expired": "closed",
 }
-STATUS_LABELS = {
-    "action_needed": "✋ Your turn", "in_progress": "⏳ Waiting for them", "offer": "🎉 Offer",
-    "ghosted": "👻 Ghosted", "rejected": "✕ Rejected", "expired": "⌛ Expired",
-}
-LABEL_TO_STATUS = {label: status for status, label in STATUS_LABELS.items()}
 
 QUOTES = [
     "Every application is a door you knocked on. Some open later than you think.",
@@ -108,10 +104,6 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
     emails["received_at"] = pd.to_datetime(emails["received_at"], utc=True, format="ISO8601")
     return apps, emails
 
-
-def nice_name(name: str) -> str:
-    # Extracted names are lowercase ("blablacar"); corrected ones keep your capitalization
-    return name.title() if name == name.lower() and "." not in name else name
 
 
 def days_ago(when: pd.Timestamp, now: datetime) -> str:

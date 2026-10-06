@@ -32,34 +32,6 @@ profile. A job search is easier to keep going when you see the facts instead of 
 
 ![Rejection reasons (demo data)](docs/rejections.png)
 
-## How it works
-
-```mermaid
-flowchart LR
-    G[Gmail API<br/>read-only] -->|new emails only| S[sync.py]
-    S --> DB[(SQLite<br/>raw emails)]
-    DB --> C[job_filter.py<br/>classify]
-    C --> X[extract.py<br/>company + position]
-    X --> A[applications.py<br/>group + status]
-    A --> R[reasons.py<br/>why rejected]
-    R --> D[Streamlit<br/>dashboard]
-    D -->|your corrections| O[(overrides)]
-    O --> A
-```
-
-One design rule runs through the project: **store the raw data, recompute everything derived
-from it.** Raw emails are kept in SQLite. Categories, applications, statuses and reasons are
-rebuilt from them on each sync, so improving a rule improves the whole history instantly, without
-calling Gmail again (`python -m app.services.sync --reclassify`). Statuses depend on today's date
-(an application becomes "ghosted" overnight), which is another reason to recompute rather than store.
-
-## Privacy
-
-- The Gmail permission is `gmail.readonly`: the app cannot send, delete or modify anything.
-- Everything stays on your machine: emails are stored in a local SQLite file, nothing is uploaded.
-- `client_secret.json`, `token.json`, the database and logs are all git-ignored.
-- **Demo mode** runs on fictional companies, so the app can be shown without real emails.
-  All screenshots in this README come from it.
 
 ## Quick start
 
@@ -69,13 +41,6 @@ Requires Python 3.11+.
 python -m venv venv
 venv\Scripts\activate          # macOS/Linux: source venv/bin/activate
 pip install -r requirements.txt
-```
-
-### Try it with demo data (no Google account needed)
-
-```powershell
-$env:DEMO = "true"             # macOS/Linux: export DEMO=true
-streamlit run dashboard.py
 ```
 
 ### Use it with your own Gmail
@@ -95,41 +60,7 @@ streamlit run dashboard.py
 
 Settings (in a `.env` file or as environment variables): `USER_NAME`, `GHOST_DAYS` (default 15).
 
-## Tests
-
-```bash
-pip install -r requirements-dev.txt
-pytest
-```
-
-Most test cases come from real emails that the rules once got wrong. For example, *"If you are
-not selected for this position..."* is a confirmation, not a rejection.
-
-## Project structure
-
-```
-app/
-  core/config.py          settings (paths, ghost delay, demo mode)
-  db/database.py          SQLite schema, migrations, queries
-  filters/job_filter.py   email classification rules
-  filters/extract.py      company and position extraction
-  filters/reasons.py      rejection reasons
-  services/gmail.py       Gmail API: login, search, download
-  services/sync.py        incremental sync (manual or scheduled)
-  services/applications.py  grouping into applications, statuses
-  demo.py                 fictional demo data
-dashboard.py              Streamlit dashboard
-scripts/                  Windows scheduled task installer
-tests/                    pytest suite
-```
 
 ## Tech stack
 
 Python · Gmail API (OAuth 2.0) · SQLite · pandas · Streamlit · Altair · pytest
-
-## Roadmap
-
-- [ ] **ML classifier:** replace the hand-written rules with a scikit-learn model trained on
-      labeled emails, and measure it against the rules (precision, recall, confusion matrix)
-- [ ] **LLM extraction:** company, position and rejection reason extracted by a language model
-- [ ] REST API with FastAPI
