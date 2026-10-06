@@ -50,6 +50,9 @@ RULES = {
         r"bien recu votre candidature", r"candidature bien recue", r"reception de votre candidature",
         r"candidature a (bien )?ete (recue|envoyee|transmise)", r"merci (pour|de) votre candidature",
         r"merci d.avoir postule",
+        # Framatome / Talentsoft: "Nous vous remercions d'avoir répondu à notre offre",
+        # "Votre candidature fera l'objet d'une étude approfondie"
+        r"remercions d.avoir (repondu a notre offre|postule)", r"candidature fera l.objet d.une etude",
     ],
 }
 

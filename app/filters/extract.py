@@ -4,16 +4,18 @@ from email.utils import parseaddr
 from app.filters.job_filter import normalize
 
 # Recruiting platforms (ATS) send emails for many companies, so their domain says nothing
-# about the company. For Workday the company is the part before the @: thales@myworkday.com
+# about the company.
 ATS_DOMAINS = [
     "myworkday", "lever", "workable", "workablemail", "ashbyhq", "smartrecruiters", "join",
     "bamboohr", "pinpoint", "greenhouse", "teamtailor", "welcomekit", "jobposting", "dayforce",
     "allibo", "recruitee", "jobvite", "icims", "successfactors", "taleo", "hellowork",
-    "welcometothejungle",
+    "welcometothejungle", "talent-soft", "talentsoft",
 ]
+# ...except these, which put the company before the @: thales@myworkday.com, framatome@talent-soft.com
+COMPANY_BEFORE_AT = ["myworkday", "talent-soft"]
 # Domains that don't name the organisation: personal mailboxes, governments, the EU...
 GENERIC_DOMAINS = ["gmail", "outlook", "hotmail", "yahoo", "gov", "europa"]
-# Workday addresses that aren't a company name (system@myworkday.com...)
+# Addresses on those platforms that aren't a company name (system@myworkday.com...)
 WORKDAY_NON_COMPANY = ["system", "workday", "notification", "notifications", "noreply", "no-reply"]
 
 # Patterns are applied to the *normalized* subject (lowercase, no accents)
@@ -37,6 +39,7 @@ POSITION_PATTERNS = [
     r"thales careers - ([^.\n]+?)$",
     r"application - ([^.\n]+?) at ",
     r"thanks for applying to ([^.\n]+?) - ",
+    r"offre [\d-]+ [–-] ([^.\n]+?)$",  # "Votre candidature - offre 2026-27758 – Stage - ..."
 ]
 
 TEAM_WORDS = r"\b(recruiting|recruitment|talent|hiring|hr|rh|team|equipe|careers?|workday|notification|no ?reply|de recrutement|de chez|group)\b"
@@ -55,8 +58,8 @@ def _company_from_address(address: str) -> str | None:
     if len(parts) < 2:
         return None
     main = parts[-2]  # mail.amazon.jobs -> amazon, jobalerts.thalesgroup.com -> thalesgroup
-    if main == "myworkday":
-        # Workday is the one platform that puts the company before the @: thales@myworkday.com
+    if main in COMPANY_BEFORE_AT:
+        # These platforms put the company before the @: thales@myworkday.com, framatome@talent-soft.com
         return None if local in WORKDAY_NON_COMPANY else local
     if any(main.startswith(ats) for ats in ATS_DOMAINS) or main in GENERIC_DOMAINS:
         # Other platforms use random codes (r-c-6a6f704e...@...) -> use the display name instead

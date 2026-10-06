@@ -9,6 +9,7 @@ from app.filters.extract import company_key, extract_company, extract_position, 
     ("no-reply@company.example", "Your application at Bigblue", "bigblue"),
     # Workday puts the company before the @
     ("Thales Group <thales@myworkday.com>", "Thales Careers - Software Engineering Intern", "thales"),
+    ("FRAMATOME RECRUTEMENT <framatome@talent-soft.com>", "Votre candidature - offre 2026-27758", "framatome"),
     # Company domain
     ("no-reply@optiver.com", "Optiver – Application Update", "optiver"),
     # Recruiting platform with a random code before the @: fall back to the display name

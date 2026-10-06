@@ -31,6 +31,14 @@ CREATE TABLE IF NOT EXISTS applications (
     rejection_quote TEXT            -- the sentence of the email that says it
 );
 
+-- Your hand labels: the "gold" ground truth that both the rules and the ML model are measured
+-- against. Never rebuilt or overwritten by the code, only by you.
+CREATE TABLE IF NOT EXISTS labels (
+    email_id   TEXT PRIMARY KEY REFERENCES emails(id),
+    label      TEXT NOT NULL,       -- confirmation / rejection / assessment / interview / offer / not_job
+    labeled_at TEXT NOT NULL
+);
+
 -- One row per sync run, so the dashboard can say "synced at 07:00" or warn you if it failed.
 CREATE TABLE IF NOT EXISTS sync_runs (
     ran_at     TEXT NOT NULL,
@@ -67,6 +75,14 @@ def _migrate(conn: sqlite3.Connection) -> None:
     _add_column_if_missing(conn, "applications", "anchor_email_id", "TEXT")
     _add_column_if_missing(conn, "applications", "rejection_reason", "TEXT")
     _add_column_if_missing(conn, "applications", "rejection_quote", "TEXT")
+
+
+def save_label(conn: sqlite3.Connection, email_id: str, label: str) -> None:
+    conn.execute(
+        "INSERT OR REPLACE INTO labels (email_id, label, labeled_at) VALUES (?, ?, ?)",
+        (email_id, label, datetime.now(timezone.utc).isoformat()),
+    )
+    conn.commit()
 
 
 def record_sync_run(conn: sqlite3.Connection, new_emails: int | None, ok: bool, message: str = "") -> None:

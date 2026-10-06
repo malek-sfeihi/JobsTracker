@@ -19,6 +19,10 @@ from app.filters.job_filter import classify, normalize
      "keep an eye on our jobs page.", "confirmation"),
     ("Thanks for applying!",
      "Unfortunately, due to the high volume of interest we cannot reply to everyone.", "confirmation"),
+    # Framatome (Talentsoft): a confirmation phrased with none of the usual words
+    ("Votre candidature - offre 2026-27758",
+     "Nous vous remercions d'avoir répondu à notre offre d'emploi. Votre candidature fera l'objet "
+     "d'une étude approfondie par notre équipe de recruteurs.", "confirmation"),
     # Real rejections phrased differently
     ("Your application", "We have decided not to move forward with your application.", "rejection"),
     ("Votre candidature", "Celle-ci ne correspond malheureusement pas au profil recherché.", "rejection"),
