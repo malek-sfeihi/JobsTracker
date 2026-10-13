@@ -1,6 +1,7 @@
 """Which emails to label by hand, to build the "gold" dataset."""
 import random
-import sqlite3
+
+from app.db.database import Connection
 
 LABELS = ["confirmation", "rejection", "assessment", "interview", "offer", "not_job"]
 
@@ -9,7 +10,7 @@ LABELS = ["confirmation", "rejection", "assessment", "interview", "offer", "not_
 NEGATIVE_SAMPLE = 120
 
 
-def labeling_queue(conn: sqlite3.Connection, seed: int = 42) -> list[str]:
+def labeling_queue(conn: Connection, seed: int = 42) -> list[str]:
     """Email ids to label: every email the rules flagged + a random sample of the others.
 
     Shuffled, so you don't see all the "job" emails first (that would hint at the answer).

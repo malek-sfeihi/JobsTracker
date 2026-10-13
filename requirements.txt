@@ -7,3 +7,5 @@ google-api-python-client==2.149.0
 streamlit==1.65.0
 pandas==3.0.6
 altair==6.3.0
+sqlalchemy==2.1.4
+psycopg[binary]==3.3.6

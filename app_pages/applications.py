@@ -10,11 +10,11 @@ from app.filters.reasons import REASON_LABELS
 from app.ui import CATEGORY_LABELS, STATUS_LABELS, nice_name
 
 conn = get_connection()
-apps = pd.read_sql("SELECT * FROM applications", conn)
+apps = pd.read_sql("SELECT * FROM applications", conn.sqlalchemy)
 emails = pd.read_sql(
     "SELECT id, application_id, received_at, category, sender, subject FROM emails "
     "WHERE application_id IS NOT NULL ORDER BY received_at",
-    conn,
+    conn.sqlalchemy,
 )
 conn.close()
 

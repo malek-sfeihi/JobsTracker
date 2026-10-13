@@ -93,10 +93,10 @@ st.markdown(
 # ---------------------------------------------------------------- data
 def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
     conn = get_connection()
-    apps = pd.read_sql("SELECT * FROM applications", conn)
+    apps = pd.read_sql("SELECT * FROM applications", conn.sqlalchemy)
     emails = pd.read_sql(
         "SELECT application_id, received_at, category FROM emails WHERE application_id IS NOT NULL",
-        conn,
+        conn.sqlalchemy,
     )
     conn.close()
     for column in ("first_activity", "last_activity"):

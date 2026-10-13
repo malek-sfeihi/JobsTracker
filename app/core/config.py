@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     client_secret_path: Path = BASE_DIR / "client_secret.json"
     token_path: Path = BASE_DIR / "token.json"
     db_path: Path = BASE_DIR / "jobtracker.db"
+    # Online database (PostgreSQL), e.g. postgresql://user:password@host/db - set it in .env, never
+    # in the code. Empty = use the local SQLite file above.
+    database_url: str | None = None
     # No news for this many days after your last step -> ghosted (or expired, if it was your turn)
     ghost_days: int = 15
     # Shown in the dashboard greeting; set USER_NAME in .env to change it
@@ -26,6 +29,7 @@ class Settings(BaseSettings):
     def _use_demo_database(self) -> "Settings":
         if self.demo:
             self.db_path = BASE_DIR / "demo.db"
+            self.database_url = None  # the demo always stays local, never touches the real database
             self.user_name = "Alex"
         return self
 

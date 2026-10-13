@@ -117,17 +117,19 @@ def build_applications() -> None:
         # Why they said no: read from the most recent rejection email
         rejections = [e for e in app["emails"] if e["category"] == "rejection"]
         reason, quote = extract_reason(rejections[-1]["body"]) if rejections else (None, None)
-        cursor = conn.execute(
+        # RETURNING id: the database tells us the id it just created (works in SQLite and PostgreSQL)
+        new_id = conn.execute(
             """INSERT INTO applications
                (company, position, kind, status, last_activity, first_activity, anchor_email_id,
                 rejection_reason, rejection_quote)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+               RETURNING id""",
             (company, position, app["kind"], status, app["emails"][-1]["date"].isoformat(),
              app["emails"][0]["date"].isoformat(), anchor, reason, quote),
-        )
+        ).fetchone()["id"]
         conn.executemany(
             "UPDATE emails SET application_id = ? WHERE id = ?",
-            [(cursor.lastrowid, e["id"]) for e in app["emails"]],
+            [(new_id, e["id"]) for e in app["emails"]],
         )
     conn.commit()
     conn.close()

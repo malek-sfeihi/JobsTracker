@@ -9,7 +9,7 @@ import random
 from datetime import datetime, timedelta, timezone
 
 from app.core.config import settings
-from app.db.database import get_connection, record_sync_run, save_email
+from app.db.database import close_all, get_connection, record_sync_run, save_email
 from app.filters.job_filter import classify, detect_kind
 from app.services.applications import build_applications
 
@@ -108,6 +108,7 @@ def _email(n: int, company: str, position: str, days_ago: int, kind: str, now: d
 def seed_demo() -> None:
     if not settings.demo:
         raise SystemExit("Refusing to write demo data into your real database: set DEMO=true first.")
+    close_all()  # release the file before deleting it (Windows refuses to delete an open file)
     settings.db_path.unlink(missing_ok=True)  # start fresh: demo.db only, never jobtracker.db
     random.seed(7)  # same "random" times on every run
     now = datetime.now(timezone.utc)
