@@ -142,10 +142,14 @@ with st.sidebar:
         st.info("Demo mode: fictional companies and emails.", icon=":material/science:")
     elif st.button("Sync with Gmail", icon="🔄", width="stretch"):
         from app.services.sync import sync
-        with st.spinner("Reading new emails..."):
-            new_count = sync()
-            build_applications()
-        st.toast(f"{new_count} new email(s) synced")
+        try:
+            with st.spinner("Reading new emails..."):
+                # Online (GMAIL_TOKEN set) there is nobody to click "log in": never open a browser
+                new_count = sync(interactive=not settings.gmail_token)
+                build_applications()
+            st.toast(f"{new_count} new email(s) synced")
+        except Exception as error:  # the failure is also recorded in sync_runs, shown below
+            st.error(f"Sync failed: {error}", icon=":material/error:")
     # Last sync (the 7:00 scheduled one, or a manual click): reassure, or warn if it failed
     conn = get_connection()
     last_run = conn.execute("SELECT * FROM sync_runs ORDER BY ran_at DESC LIMIT 1").fetchone()

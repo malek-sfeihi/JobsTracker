@@ -4,8 +4,9 @@ python-dotenv==1.0.1
 pydantic-settings==2.6.0
 google-auth-oauthlib==1.2.1
 google-api-python-client==2.149.0
-streamlit==1.65.0
+streamlit[auth]==1.65.0
 pandas==3.0.6
 altair==6.3.0
 sqlalchemy==2.1.4
 psycopg[binary]==3.3.6
+Authlib==1.8.0

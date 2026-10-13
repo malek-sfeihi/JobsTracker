@@ -1,4 +1,5 @@
 import base64
+import json
 import re
 from datetime import datetime, timezone
 from html import unescape
@@ -22,6 +23,18 @@ def get_credentials(interactive: bool = True) -> Credentials:
     interactive=False (scheduled runs): never open a browser - raise LoginRequiredError instead,
     otherwise the task would wait forever for a login nobody is there to do.
     """
+    if settings.gmail_token:
+        # Online: the authorization comes from a secret, there is no file and no browser
+        creds = Credentials.from_authorized_user_info(json.loads(settings.gmail_token), settings.gmail_scopes)
+        if not creds.valid:
+            try:
+                creds.refresh(Request())
+            except RefreshError:
+                raise LoginRequiredError(
+                    "Gmail authorization expired: update the GMAIL_TOKEN secret with a fresh token.json."
+                ) from None
+        return creds
+
     creds = None
     if settings.token_path.exists():
         creds = Credentials.from_authorized_user_file(

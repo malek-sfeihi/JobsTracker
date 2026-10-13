@@ -9,3 +9,9 @@ logs/
 # Local AI-assistant skills (links to files inside the venv, not part of the project)
 .claude/
 .agents/
+
+# Personal learning notes and exercises (kept private)
+learning/
+
+# Streamlit secrets (passwords, tokens) - never commit
+.streamlit/secrets.toml

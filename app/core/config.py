@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     # Online database (PostgreSQL), e.g. postgresql://user:password@host/db - set it in .env, never
     # in the code. Empty = use the local SQLite file above.
     database_url: str | None = None
+    # Online only: the content of token.json (your Gmail authorization), stored as a secret because
+    # the server has no token.json file and nobody can click "log in" there
+    gmail_token: str | None = None
+    # Online only: the one Google account allowed to open the dashboard
+    allowed_email: str | None = None
     # No news for this many days after your last step -> ghosted (or expired, if it was your turn)
     ghost_days: int = 15
     # Shown in the dashboard greeting; set USER_NAME in .env to change it
