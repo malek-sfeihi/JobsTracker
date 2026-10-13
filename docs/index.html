@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JobsTracker</title>
+  <meta name="description" content="JobsTracker: a calm morning dashboard for a job search, built from Gmail (read-only).">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+  <style>
+    :root { --paper: #F6F4F0; --surface: #FFFFFF; --tint: #EFEAF6; --ink: #1F2433; --ink-2: #5B6070; --accent: #5E4E96; --line: rgba(31,36,51,.09); color-scheme: light; }
+    @media (prefers-color-scheme: dark) {
+      :root { --paper: #17161C; --surface: #201F27; --tint: #2A2635; --ink: #F2F0F7; --ink-2: #C4C0D0; --accent: #B7A9F0; --line: rgba(255,255,255,.09); color-scheme: dark; }
+    }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    main { max-width: 860px; margin: 0 auto; padding: 40px 20px 60px; }
+    .hero { background: linear-gradient(120deg, var(--tint), var(--paper)); border: 1px solid var(--line); border-radius: 22px; padding: 34px 32px; }
+    h1 { margin: 0 0 6px; font-size: 2.2rem; }
+    p { color: var(--ink-2); }
+    img { width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); margin: 26px 0 8px; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .links a { padding: 9px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 550; }
+    .links a.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    @media (prefers-color-scheme: dark) { .links a.primary { color: #17161C; } }
+    footer { color: var(--ink-2); font-size: .85rem; margin-top: 30px; text-align: center; }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <h1>🌿 JobsTracker</h1>
+      <p>
+        A calm morning dashboard for a job search. JobsTracker reads Gmail in read-only mode,
+        finds the emails about job applications, groups them by company and position, and shows
+        where everything stands: what needs attention today, who is still reviewing, who went
+        silent, and why companies said no.
+      </p>
+      <div class="links">
+        <a class="primary" href="https://github.com/malek-sfeihi/JobsTracker">Source code on GitHub</a>
+        <a href="privacy.html">Privacy policy</a>
+      </div>
+    </section>
+    <img src="dashboard.png" alt="JobsTracker dashboard with fictional demo data">
+    <p style="text-align: center; font-size: .9rem;">Screenshot with fictional demo data.</p>
+    <footer>Personal, non-commercial project by Malek Sfeihi · <a href="privacy.html">Privacy policy</a></footer>
+  </main>
+</body>
+</html>
