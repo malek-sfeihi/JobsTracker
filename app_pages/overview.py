@@ -140,6 +140,9 @@ with st.sidebar:
             from app.demo import seed_demo
             seed_demo()
         st.info("Demo mode: fictional companies and emails.", icon=":material/science:")
+    elif not (settings.gmail_token or settings.client_secret_path.exists()):
+        # Online without a Gmail authorization: syncing happens on your PC (7:00 task) instead
+        st.caption(":material/schedule: Emails are synced automatically every morning.")
     elif st.button("Sync with Gmail", icon="🔄", width="stretch"):
         from app.services.sync import sync
         try:
